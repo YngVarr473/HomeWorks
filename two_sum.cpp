@@ -4,18 +4,15 @@ public:
         vector<int> result{};
         
         for (int i = 0; i < nums.size(); i++) {
-            if (i - 1 >= 0) {
-
-                if (nums[i - 1] > 0 && nums[i] > 0) {
-                    if (nums[i - 1] + nums[i] == target) {
-                        result.push_back(nums[i - 1], nums[i])
-                    }
+            int k = 0;
+            for (int j = 0; j < nums.size(); i++) {
+                k = nums[j] + nums[i];
+                if (k == target) {
+                    result.push_back(nums[i]);
+                    result.push_back(nums[j]);
                 }
-            } else if (nums[i] + nums[i + 1] == target) {
-                    result.push_back(nums[i], nums[i + 1])
             }
         }
-    std::cout << result[i],[i+]
         return result;
     }
 };
