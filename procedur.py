@@ -1,67 +1,87 @@
-import pygame
-import sys
-import math
-
+import sys, pygame
+import time
+from pygame.math import Vector2
 pygame.init()
 
-class Node:
-    def __init__(self, center_pos, index = 1):
-        self.center = center_pos
-        self.index = index
-        self.next_node = None
-        self.angle = 0 
-    # задаёт позиции центра, а дальше я не понял
-    
-    def __draw_axis(self, screen):
-        end_x = self.center[0] + 100 * math.cos(math.radians(self.angle))
-        end_y = self.center[1] + 100 * math.sin(math.radians(self.angle))
-        pygame.draw.line(screen, (255,0,0), self.center, (end_x, end_y), 2)
+size = width, height = 640, 480
+screen = pygame.display.set_mode(size)
 
-        end_x = self.center[0] - 100 * math.cos(math.radians(self.angle + 90))
-        end_y = self.center[1] - 100 * math.sin(math.radians(self.angle + 90))
-        pygame.draw.line(screen, (0,0,255), self.center, (end_x, end_y), 2)
-# Отрисовывает линии, как в координатной прямой, перпендикулярные друг другу. Я не знаю, зачем они нужны?
-# Здесь задействованы разные математические функции из библиотеки math: cos, sin for example
+HEAD = pygame.image.load("./sprite-0001.png")
+BODY = pygame.image.load("./sprite-0002.png")
+TAIL = pygame.image.load("./sprute.png")
 
-    def draw(self, screen):
-        pygame.draw.circle(screen, (0,0,0), self.center, 50, 2)
-        pygame.draw.circle(screen, (0,0,0), self.center, 5, 0)
-# Создаёт форму нода (круг с точкой в центре)
+BODY_RECT = BODY.get_rect()
+TAIL_RECT = TAIL.get_rect()
+HEAD_RECT = HEAD.get_rect()
 
-        self.__draw_axis(screen)
+points = list(map(Vector2, [(i*50, 100) for i in range(7)]))
+target = Vector2(450, 300)
 
-        if self.next_node:
-            self.next_node.draw(screen)
-            pygame.draw.line(screen, (0,0,0), self.center, self.next_node.center, 2)
-# Если появляется следущий Node, создаётся линия между ними (кость)
+rel_points = []
+angles = []
 
-    def add_node(self, pos):
-        if self.next_node == None:
-            self.next_node = Node(pos, self.index + 1)  
+max_angle = 360 # Adjust for limited angles
+target_speed = Vector2(1, 1)
+lerp_factor = 0.1  # Adjust this value to control the smoothness of the movement
+for i in range(1, len(points)):
+    rel_points.append(points[i] - points[i-1])
+    angles.append(0)
+
+def solve_ik(i, endpoint, target):
+    if i < len(points) - 2:
+        endpoint = solve_ik(i+1, endpoint, target)
+    current_point = points[i]
+
+    angle = (endpoint-current_point).angle_to(target-current_point)
+    angles[i] += min(max(-3, angle), 3)
+    angles[i] = min(max(180-max_angle, (angles[i]+180)%360), 180+max_angle)-180
+
+    return current_point + (endpoint-current_point).rotate(angle)
+
+def render():
+    black = 0, 0, 0
+    white = 255, 255, 255
+
+    screen.fill(white)
+    for i in range(1, len(points)):
+        prev = points[i-1]
+        cur = points[i]
+        pygame.draw.aaline(screen, black, prev, cur)
+    for point in points:
+        if point == points[0]:
+            pass
+        elif point == points[-1]:
+            screen.blit(TAIL, (int(point[0] -64 // 2), int(point[1]) -64 // 2))
         else:
-            self.next_node.add_node(pos)
-# Не понял
-
-class Window:   #Создание игрового окна
-    def __init__(self):
-        self.height = 800   #Задали размеры окна, в пикселях
-        self.width = 600
-        self.screen = pygame.display.set_mode((self.height, self.width))    #одна из функций библиотеки - pygame, создаёт окно и задаёт размер с помощью (self.height, self.width), тоесть принимаёт за высоту и длину их значения     
-        self.root_node = Node((500,200))
-        self.root_node.add_node((300,300))      # Создание корневого Node и доблавение ещё 2-ух, в скобках их размеры 
-        self.root_node.add_node((200,400))
+            screen.blit(BODY, (int(point[0] -64 // 2), int(point[1]) -64 // 2))
         
-    def run(self):
-        while True:
-            for event in pygame.event.get():    #обработка нажатия клавиш, мыши (нажатия клавиш и деёствия для них берутся из main.py)
-                keys = pygame.key.get_pressed() #с помощью этого как раз определеяется какая клавиша нажата, идёт обращение к коду из main.py
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-            self.screen.fill((47,64,64))     # закрашивает игровое поле белым цветом и выполняется всегда, т.к. относится к циклу while 
-            self.root_node.draw(self.screen)     # обращение к методу draw, тоесть сначала идёт очистка всей карты  
-                                                    # с помощью предыдущей строки, а затем заново рисует Node  
-            pygame.display.flip()   # в конце после всего завершения всех изменений цикла экран смняется на новый (обновляется кадр) 
+        pygame.draw.circle(screen, black, (int(point[0]), int(point[1])), 5)
 
-window = Window()   # вызывает класс Window, тоесть создаётся игровое окно
-window.run()    #вызывает класс run, отображает все действия  
+    screen.blit(HEAD, (points[0][0] -64 // 2, points[0][1] -64 // 2))
+    pygame.display.flip()
+
+while 1:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: sys.exit()
+
+    # Move the target
+    target = Vector2(pygame.mouse.get_pos())
+
+    # Update the positions of the points to follow the target with a fixed distance
+    for i in range(len(points) - 1, 0, -1):
+        direction = (points[i-1] - points[i]).normalize()
+        points[i] = points[i-1] - direction * 50
+
+    # Use lerp to move the main node towards the target
+    points[0] = points[0].lerp(target, lerp_factor)
+
+    # Update the target position based on speed
+    target += target_speed
+    if target.x <= 0 or target.x >= width:
+        target_speed.x = -target_speed.x
+    if target.y <= 0 or target.y >= height:
+        target_speed.y = -target_speed.y
+
+    render()
+
+    pygame.time.wait(int(1000/60))
