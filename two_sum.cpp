@@ -5,7 +5,7 @@ public:
         
         for (int i = 0; i < nums.size(); i++) {
             int k = 0;
-            for (int j = 0; j < nums.size(); i++) {
+            for (int j = 0; j < nums.size(); j++) {
                 k = nums[j] + nums[i];
                 if (k == target) {
                     result.push_back(nums[i]);
