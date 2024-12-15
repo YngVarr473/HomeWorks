@@ -13,8 +13,10 @@ std::vector <int>vr_void(n);
     }
 
     for (int i = 0; i < vr_void.size(); i++) {
-        if (i - 1 >= 0) {
-            if (vr_void[i - 1] > 0 && vr_void[i] > 0) {
+            if (vr_void[i - 1] >= 0 && vr_void[i] >= 0) {
+                std::cout << vr_void[i -1]  << " " << vr_void[i];
+                break;
+            if (vr_void[i - 1] <= 0 && vr_void[i] <= 0) {
                 std::cout << vr_void[i -1]  << " " << vr_void[i];
                 break;
             } 
