@@ -1,25 +1,25 @@
 #include <iostream>
 #include <vector>
-#include <iomanip> 
 
-int min(int a,int b) {
-    std::cin >> a >> b;
-    int x = (a < b) ? a : b;
-    return x;
-}
+double funk(std::vector<int>& fuct, double& yuo) {
+    int fh;
+    std::cin >> fh;
 
-int min4(int a, int b, int c, int d) {
-    int m1, m2, result;
-    std::cin >> a >> b >> c >> d;
-    m1 = min(a, b);
-    m2 = min(c, d);
-    result = min(m1, m2);
-    return result;
+    if (fh != 0) {
+        yuo += fh;
+        fuct.push_back(fh);
+        funk(fuct, yuo);
+    } else {
+        return yuo;
+    }
 }
 
 int main() {
-    int a, b, c, d;
-    std::cin >> a >> b >> c >> d;
-    std::cout << min4(a, b, c, d) << std::endl;
+    double yuo = 0;
+    std::vector<int> fuct;
+
+    double result = funk(fuct, yuo);
+    std::cout << result << std::endl;
+
     return 0;
-} 
+}
