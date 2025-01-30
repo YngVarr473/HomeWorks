@@ -1,29 +1,36 @@
 #include <iostream>
+#include <map>
 #include <string>
-#include <algorithm>
-#include <cctype>
-#include <vector>
 
-int main() {
-
-    std::vector<std::string> text;
-    std::string line;
-
-    while(std::getline(std::cin, line)) {
-        text.push_back(line);
-    }
-
-    int count = 0;
-    
-    for (const auto &line : text) {
-        for (char c : line) {
-            if (c == ' ') {
-                count += 1;
-            }
+std::string key_by_value(const std::map<std::string, std::string>& voc, const std::string value) {
+    for(const auto& pair : voc) {
+        if(pair.second == value) {
+            return pair.first;
+        } else if (pair.first == value) {
+            return pair.second;
         }
     }
-    
-    std::cout << count + 1 << std::endl;
+    return "";
+}
 
+int main() {
+    std::map<std::string, std::string> voc;
+
+    int n;
+    std::cin >> n;
+
+    std::string word, translation;
+
+    for (int i = 0; i < n; i++) {
+        std::cin >> word;
+        std::cin >> translation;
+        voc[word] = translation;
+    }
+
+    std::string value;
+    std::cin >> value;
+
+    std::cout << key_by_value(voc, value);
+    
     return 0;
 }
