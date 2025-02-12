@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <set>
-#include <vector>
+#include <vector> 
 
 /*
 «Сто лет одиночества» Габриэля Гарсиа Маркеса 1967
